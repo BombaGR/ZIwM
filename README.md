@@ -1,2 +1,9 @@
 # ZIwM
-Neurtal network project at Zastosowań informatyki w medycynie. PWr
+
+Neural network project for course Zastosowań informatyki w medycynie. PWr
+
+**Collaborators:**
+
+Filip Baszak
+
+Mateusz Wojcik
