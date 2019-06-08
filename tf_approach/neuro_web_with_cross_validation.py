@@ -66,6 +66,7 @@ if __name__ == '__main__':
         keras.layers.Dense(20, activation=tf.nn.softmax)
     ])
 
+
     model_1.compile(optimizer='adam',
                     loss='sparse_categorical_crossentropy',
                     metrics=['accuracy'])
@@ -77,6 +78,7 @@ if __name__ == '__main__':
         keras.layers.Dense(200, activation=tf.nn.relu),
         keras.layers.Dense(20, activation=tf.nn.softmax)
     ])
+
 
     model_2.compile(optimizer='adam',
                     loss='sparse_categorical_crossentropy',
