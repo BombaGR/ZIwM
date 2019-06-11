@@ -7,7 +7,6 @@ import tensorflow as tf
 from pandas import DataFrame
 import numpy as np
 import logging
-import matplotlib.pyplot as plt
 
 logging.basicConfig(level=logging.INFO)
 
@@ -17,9 +16,11 @@ def split_data_and_lables(data: DataFrame, divide_value: int = 8):
     lable_list = []
     for index, row in data.iterrows():
         lable_list.append(row['Unnamed: 0'])
-        data_list.append([i / divide_value for i in row[2:22]])
+        data_list.append([i / divide_value for i in row[[5, 19, 6, 18, 3, 15, 8, 16, 10, 9]]])
     return np.array(data_list), np.array([lable - 1 for lable in lable_list])
 
+
+# 5, 19, 6, 18, 3, 15, 8, 16, 10, 9
 
 def k_time_cross_validation(model: Any, name_model: str, data: DataFrame, k_time: int = 5) -> Tuple[str, float, float]:
     results = []
@@ -57,45 +58,82 @@ def k_time_cross_validation(model: Any, name_model: str, data: DataFrame, k_time
 
 
 if __name__ == '__main__':
+    INPUT_SIZE = 10
     results_list = []
-    raw_data = read_xls_ziwm('/home/matewojc/my_stuff/ZIwM/data/bialaczka.XLS')
+    raw_data = read_xls_ziwm('/home/bomba/PycharmProjects/ZIwM/data/bialaczka.XLS')
 
     model_1 = keras.Sequential([
-        keras.layers.Dense(20, activation=tf.nn.relu),
+        keras.layers.Dense(INPUT_SIZE, activation=tf.nn.relu),
         keras.layers.Dense(130, activation=tf.nn.relu),
         keras.layers.Dense(20, activation=tf.nn.softmax)
     ])
 
-
-    model_1.compile(optimizer='adam',
+    model_1.compile(optimizer='rmsprop',
                     loss='sparse_categorical_crossentropy',
                     metrics=['accuracy'])
 
     results_list.append(k_time_cross_validation(model_1, 'model1', raw_data))
 
     model_2 = keras.Sequential([
-        keras.layers.Dense(20, activation=tf.nn.relu),
+        keras.layers.Dense(INPUT_SIZE, activation=tf.nn.relu),
         keras.layers.Dense(200, activation=tf.nn.relu),
         keras.layers.Dense(20, activation=tf.nn.softmax)
     ])
 
-
-    model_2.compile(optimizer='adam',
+    model_2.compile(optimizer='rmsprop',
                     loss='sparse_categorical_crossentropy',
                     metrics=['accuracy'])
 
     results_list.append(k_time_cross_validation(model_2, 'model2', raw_data))
 
     model_3 = keras.Sequential([
-        keras.layers.Dense(20, activation=tf.nn.relu),
+        keras.layers.Dense(INPUT_SIZE, activation=tf.nn.relu),
         keras.layers.Dense(60, activation=tf.nn.relu),
         keras.layers.Dense(20, activation=tf.nn.softmax)
     ])
 
-    model_3.compile(optimizer='adam',
+    model_3.compile(optimizer='rmsprop',
                     loss='sparse_categorical_crossentropy',
                     metrics=['accuracy'])
 
     results_list.append(k_time_cross_validation(model_3, 'model3', raw_data))
+    # ======================SGD WITH MOMENTUM======================================
+    model_4 = keras.Sequential([
+        keras.layers.Dense(INPUT_SIZE, activation=tf.nn.relu),
+        keras.layers.Dense(130, activation=tf.nn.relu),
+        keras.layers.Dense(20, activation=tf.nn.softmax)
+    ])
+
+    sgd_1 = keras.optimizers.SGD(momentum=0.9)
+
+    model_4.compile(optimizer=sgd_1,
+                    loss='sparse_categorical_crossentropy',
+                    metrics=['accuracy'])
+
+    results_list.append(k_time_cross_validation(model_4, 'model4_sgd', raw_data))
+
+    model_5 = keras.Sequential([
+        keras.layers.Dense(INPUT_SIZE, activation=tf.nn.relu),
+        keras.layers.Dense(200, activation=tf.nn.relu),
+        keras.layers.Dense(20, activation=tf.nn.softmax)
+    ])
+
+    model_5.compile(optimizer=sgd_1,
+                    loss='sparse_categorical_crossentropy',
+                    metrics=['accuracy'])
+
+    results_list.append(k_time_cross_validation(model_5, 'model5_sgd', raw_data))
+
+    model_6 = keras.Sequential([
+        keras.layers.Dense(INPUT_SIZE, activation=tf.nn.relu),
+        keras.layers.Dense(60, activation=tf.nn.relu),
+        keras.layers.Dense(20, activation=tf.nn.softmax)
+    ])
+
+    model_6.compile(optimizer=sgd_1,
+                    loss='sparse_categorical_crossentropy',
+                    metrics=['accuracy'])
+
+    results_list.append(k_time_cross_validation(model_6, 'model6_sgd', raw_data))
 
     print(results_list)
