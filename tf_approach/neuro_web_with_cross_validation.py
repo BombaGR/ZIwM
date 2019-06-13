@@ -11,24 +11,47 @@ import logging
 logging.basicConfig(level=logging.INFO)
 
 
+def decor(numbers_of_loop):
+    def loop_results(func):
+        def inner(*args, **kwargs):
+            results = []
+            sum_loss = 0
+            sum_acc = 0
+            name = ''
+            for i in range(numbers_of_loop):
+                name_model, test_loss, test_acc = func(*args, **kwargs)
+                results.append((test_loss, test_acc))
+                name = name_model
+            for r in results:
+                sum_loss += r[0]
+                sum_acc += r[1]
+            avg_loss = sum_loss / numbers_of_loop
+            avg_acc = sum_acc / numbers_of_loop
+            logging.info('loop')
+            return name, avg_loss, avg_acc
+
+        return inner
+    return loop_results
+
+
 def split_data_and_lables(data: DataFrame, divide_value: int = 8):
     data_list = []
     lable_list = []
     for index, row in data.iterrows():
         lable_list.append(row['Unnamed: 0'])
-        data_list.append([i / divide_value for i in row[[5, 19, 6, 18, 3, 15, 8, 16, 10, 9]]])
+        data_list.append([i / divide_value for i in row[[5, 19, 6, 18, 3, 15, 8, 16, 10, 9, 11, 21, 17, 13, 4, 14, 7, 2, 12, 20]]])
     return np.array(data_list), np.array([lable - 1 for lable in lable_list])
 
 
-# 5, 19, 6, 18, 3, 15, 8, 16, 10, 9
-
+# 5, 19, 6, 18, 3, 15, 8, 16, 10, 9, 11, 21, 17, 13, 4, 14, 7, 2, 12, 20
+@decor(5)
 def k_time_cross_validation(model: Any, name_model: str, data: DataFrame, k_time: int = 5) -> Tuple[str, float, float]:
     results = []
     for i in range(k_time):
         train_raw_data, test_raw_data = train_test_split(data, test_size=0.5)
         train_data, train_lables = split_data_and_lables(train_raw_data)
         test_data, test_lables = split_data_and_lables(test_raw_data)
-        model.fit(train_data, train_lables, epochs=200)
+        model.fit(train_data, train_lables, epochs=100)
         test_loss, test_acc = model.evaluate(test_data, test_lables)
         results.append((test_loss, test_acc))
         logging.info(f'{i} - time')
@@ -47,24 +70,14 @@ def k_time_cross_validation(model: Any, name_model: str, data: DataFrame, k_time
     return name_model, loss_avg, acc_avg
 
 
-# def show_results(results: List[Tuple]):
-#     names = [i[0] for i in results]
-#     loss = [i[1] for i in results]
-#     acc = [i[2] for i in results]
-#
-#     plt.bar(acc, height=[1,2,3])
-#     plt.xticks(acc, names)
-#     plt.show()
-
-
 if __name__ == '__main__':
-    INPUT_SIZE = 10
+    INPUT_SIZE = 20
     results_list = []
     raw_data = read_xls_ziwm('/home/bomba/PycharmProjects/ZIwM/data/bialaczka.XLS')
 
     model_1 = keras.Sequential([
         keras.layers.Dense(INPUT_SIZE, activation=tf.nn.relu),
-        keras.layers.Dense(130, activation=tf.nn.relu),
+        keras.layers.Dense(10, activation=tf.nn.relu),
         keras.layers.Dense(20, activation=tf.nn.softmax)
     ])
 
@@ -88,7 +101,7 @@ if __name__ == '__main__':
 
     model_3 = keras.Sequential([
         keras.layers.Dense(INPUT_SIZE, activation=tf.nn.relu),
-        keras.layers.Dense(60, activation=tf.nn.relu),
+        keras.layers.Dense(100, activation=tf.nn.relu),
         keras.layers.Dense(20, activation=tf.nn.softmax)
     ])
 
@@ -100,7 +113,7 @@ if __name__ == '__main__':
     # ======================SGD WITH MOMENTUM======================================
     model_4 = keras.Sequential([
         keras.layers.Dense(INPUT_SIZE, activation=tf.nn.relu),
-        keras.layers.Dense(130, activation=tf.nn.relu),
+        keras.layers.Dense(10, activation=tf.nn.relu),
         keras.layers.Dense(20, activation=tf.nn.softmax)
     ])
 
@@ -126,7 +139,7 @@ if __name__ == '__main__':
 
     model_6 = keras.Sequential([
         keras.layers.Dense(INPUT_SIZE, activation=tf.nn.relu),
-        keras.layers.Dense(60, activation=tf.nn.relu),
+        keras.layers.Dense(100, activation=tf.nn.relu),
         keras.layers.Dense(20, activation=tf.nn.softmax)
     ])
 
